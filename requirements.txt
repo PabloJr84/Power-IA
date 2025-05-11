@@ -1,0 +1,4 @@
+Flask
+SQLAlchemy
+mysql-connector-python  # Se você estiver usando MySQL
+# psycopg2              # Se você estiver usando PostgreSQL
