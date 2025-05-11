@@ -1,8 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import joblib
-from sklearn.feature_extraction.text import TfidfVectorizer
-from backend.ml_model.model import prever_problema
+import os  # Importe a biblioteca os para manipulação de caminhos
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
@@ -10,15 +9,26 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://IAPowerBI:IA@161
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+# Definir o caminho para a pasta do modelo de forma mais robusta
+MODEL_FOLDER = os.path.join(os.path.dirname(__file__), 'ml_model')
+MODEL_FILE = 'powerbi_problem_classifier.pkl'
+VECTORIZER_FILE = 'tfidf_vectorizer.pkl'
+MODEL_PATH = os.path.join(MODEL_FOLDER, MODEL_FILE)
+VECTORIZER_PATH = os.path.join(MODEL_FOLDER, VECTORIZER_FILE)
+
 # Carregar o modelo treinado e o vetorizador
 modelo_ia = None
 vetorizador = None
 try:
-    modelo_ia = joblib.load('backend/ml_model/powerbi_problem_classifier.pkl')
-    vetorizador = joblib.load('backend/ml_model/tfidf_vectorizer.pkl')
+    modelo_ia = joblib.load(MODEL_PATH)
+    vetorizador = joblib.load(VECTORIZER_PATH)
     print("Modelo e vetorizador carregados com sucesso!")
+    print(f"Modelo carregado de: {MODEL_PATH}")
+    print(f"Vetorizador carregado de: {VECTORIZER_PATH}")
 except FileNotFoundError:
-    print("Erro: Arquivos do modelo não encontrados em backend/ml_model/")
+    print(f"Erro: Arquivos do modelo não encontrados em:")
+    print(f"- Modelo: {MODEL_PATH}")
+    print(f"- Vetorizador: {VECTORIZER_PATH}")
 
 class Problema(db.Model):
     __tablename__ = 'Problemas'
@@ -49,6 +59,7 @@ def obter_ajuda():
 
         if modelo_ia and vetorizador:
             print("Modelo e vetorizador estão carregados. Tentando prever...")
+            from backend.ml_model.model import prever_problema  # Importar aqui para evitar dependência circular
             categoria_prevista = prever_problema(modelo_ia, vetorizador, pergunta)
             print("Categoria prevista:", categoria_prevista)
             resposta_ia = f"A categoria prevista para sua pergunta é: {categoria_prevista}. (Implemente a lógica para a solução)."
