@@ -2,7 +2,8 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.config['JSON_ASCI'] = False # Para suportar caracteres UTF-8
+app.config['JSON_AS_ASCII'] = False # Para suportar caracteres UTF-8
+# *** AQUI VOCÊ COLOCARÁ A CONFIGURAÇÃO DO BANCO DE DADOS ***
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://IAPowerBI:IA@161207@localhost/inovac68_IA_PowerBI'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # Opcional: desativa avisos
 db = SQLAlchemy(app)
